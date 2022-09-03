@@ -30,6 +30,8 @@ class App {
 
         const currFace = new THREE.Mesh(new THREE.BufferGeometry(), new THREE.MeshBasicMaterial({ color: 'red' }));
         scene.add(currFace);
+        const adjFaces = new THREE.Mesh(new THREE.BufferGeometry(), new THREE.MeshBasicMaterial({ color: 'blue' }));
+        scene.add(adjFaces);
 
         const raycaster = new THREE.Raycaster();
         const pointer = new THREE.Vector2();
@@ -37,14 +39,24 @@ class App {
             pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
             pointer.y = - (event.clientY / window.innerHeight) * 2 + 1;
             raycaster.setFromCamera(pointer, camera);
-            const points = [];
+            const pointsCurr = [];
+            const pointsAdj = [];
             for (const inter of raycaster.intersectObjects([this.mesh])) {
-                points.push(new THREE.Vector3().fromBufferAttribute(geometry.attributes.position, inter.face.a),
+                pointsCurr.push(
+                    new THREE.Vector3().fromBufferAttribute(geometry.attributes.position, inter.face.a),
                     new THREE.Vector3().fromBufferAttribute(geometry.attributes.position, inter.face.b),
                     new THREE.Vector3().fromBufferAttribute(geometry.attributes.position, inter.face.c),
                 );
+                const adj = this.dcel.adjacentFaces(inter.faceIndex);
+                for (const face of adj) {
+                    const vertices = this.dcel.faceVertices(face.index);
+                    for (const v of vertices) {
+                        pointsAdj.push(new THREE.Vector3().fromBufferAttribute(geometry.attributes.position, v));
+                    }
+                }
             }
-            currFace.geometry.setFromPoints(points);
+            currFace.geometry.setFromPoints(pointsCurr);
+            adjFaces.geometry.setFromPoints(pointsAdj);
         });
 
         function animate() {

@@ -12,13 +12,16 @@ export class Dcel {
         this.vertices = Array.from({ length: geometry.attributes.position.count }, (_, i) => {
             return {
                 point: new THREE.Vector3().fromBufferAttribute(geometry.attributes.position, i),
-                edges: []
+                edges: [],
+                index: i
             };
         });
         const faceIndices = new THREE.Vector3();
         this.faces = Array.from({ length: geometry.index.count / 3 }, (_, i) => {
             faceIndices.fromArray(geometry.index.array, i * 3);
-            return Face.create(this.vertices[faceIndices.x], this.vertices[faceIndices.y], this.vertices[faceIndices.z]);
+            const face = Face.create(this.vertices[faceIndices.x], this.vertices[faceIndices.y], this.vertices[faceIndices.z]);
+            face.index = i;
+            return face;
         });
         this.computeTwins();
     }
@@ -44,6 +47,36 @@ export class Dcel {
             }
             return face;
         });
+    }
+
+    adjacentFaces(faceIndex) {
+        const face = this.faces[faceIndex];
+        const adj = [];
+        const start = face.edge;
+        let e = start;
+        while (true) {
+            adj.push(e.twin.face);
+            e = e.next;
+            if (e === start) {
+                break;
+            }
+        }
+        return adj;
+    }
+
+    faceVertices(faceIndex) {
+        const face = this.faces[faceIndex];
+        const vertices = [];
+        const start = face.edge;
+        let e = start;
+        while (true) {
+            vertices.push(e.head().index);
+            e = e.next;
+            if (e === start) {
+                break;
+            }
+        }
+        return vertices;
     }
 }
 
