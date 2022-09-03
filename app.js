@@ -17,16 +17,17 @@ class App {
         scene.environment = new THREE.PMREMGenerator(renderer).fromScene(new RoomEnvironment()).texture;
         scene.background = new THREE.Color(0x888888);
 
-        let geometry = new THREE.TetrahedronGeometry(10);
-        // let geometry = new THREE.TorusKnotGeometry(10, 2);
+        // let geometry = new THREE.TetrahedronGeometry(10);
+        let geometry = new THREE.TorusKnotGeometry(10, 2);
         Object.keys(geometry.attributes).filter(x => x !== 'position').forEach(x => {
             geometry.deleteAttribute(x);
         });
         geometry = BufferGeometryUtils.mergeVertices(geometry);
+        this.dcel = new Dcel(geometry);
+        geometry.computeVertexNormals();
         this.mesh = new THREE.Mesh(geometry, new THREE.MeshStandardMaterial({ color: 'green' }));
         scene.add(this.mesh);
 
-        this.dcel = new Dcel(this.mesh.geometry);
 
         function animate() {
             requestAnimationFrame(animate);
