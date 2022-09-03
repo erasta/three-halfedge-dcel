@@ -28,6 +28,24 @@ class App {
         this.mesh = new THREE.Mesh(geometry, new THREE.MeshStandardMaterial({ color: 'green' }));
         scene.add(this.mesh);
 
+        const currFace = new THREE.Mesh(new THREE.BufferGeometry(), new THREE.MeshBasicMaterial({ color: 'red' }));
+        scene.add(currFace);
+
+        const raycaster = new THREE.Raycaster();
+        const pointer = new THREE.Vector2();
+        window.addEventListener('pointermove', (event) => {
+            pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
+            pointer.y = - (event.clientY / window.innerHeight) * 2 + 1;
+            raycaster.setFromCamera(pointer, camera);
+            const points = [];
+            for (const inter of raycaster.intersectObjects([this.mesh])) {
+                points.push(new THREE.Vector3().fromBufferAttribute(geometry.attributes.position, inter.face.a),
+                    new THREE.Vector3().fromBufferAttribute(geometry.attributes.position, inter.face.b),
+                    new THREE.Vector3().fromBufferAttribute(geometry.attributes.position, inter.face.c),
+                );
+            }
+            currFace.geometry.setFromPoints(points);
+        });
 
         function animate() {
             requestAnimationFrame(animate);
