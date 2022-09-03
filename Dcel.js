@@ -12,6 +12,7 @@ const Deleted = 1;
 const _triangle = new THREE.Triangle();
 const _faceIndices = new THREE.Vector3();
 
+
 class Face {
 
     constructor() {
@@ -77,7 +78,7 @@ class Face {
         const b = this.edge.head();
         const c = this.edge.next.head();
 
-        _triangle.set(a, b, c);
+        _triangle.set(a.point, b.point, c.point);
 
         _triangle.getNormal(this.normal);
         _triangle.getMidpoint(this.midpoint);
@@ -131,7 +132,7 @@ class HalfEdge {
 
         if (tail !== null) {
 
-            return tail.distanceTo(head);
+            return tail.point.distanceTo(head.point);
 
         }
 
@@ -146,7 +147,7 @@ class HalfEdge {
 
         if (tail !== null) {
 
-            return tail.distanceToSquared(head);
+            return tail.point.distanceToSquared(head.point);
 
         }
 
@@ -168,31 +169,32 @@ class HalfEdge {
 export class Dcel {
     constructor(geometry) {
         this.vertices = Array.from({ length: geometry.attributes.position.count }, (_, i) => {
-            return new THREE.Vector3().fromBufferAttribute(geometry.attributes.position, i);
+            return {
+                point: new THREE.Vector3().fromBufferAttribute(geometry.attributes.position, i),
+                edges: []
+            };
         });
         this.faces = Array.from({ length: geometry.index.count / 3 }, (_, i) => {
             _faceIndices.fromArray(geometry.index.array, i * 3);
-            return Face.create(this.vertices[_faceIndices.x], this.vertices[_faceIndices.y], this.vertices[_faceIndices.z]);
+            const face = Face.create(this.vertices[_faceIndices.x], this.vertices[_faceIndices.y], this.vertices[_faceIndices.z]);
+            let e = face.edge;
+            for (let j = 0; j < 3; ++j, e = e.next) {
+                const a0 = e.head();
+                const b0 = e.tail();
+                if (!e.twin) {
+                    a0.edges.forEach(other => {
+                        const a1 = other.head();
+                        const b1 = other.tail();
+                        if (a0 == b1 && b0 == a1) {
+                            e.setTwin(other);
+                        }
+                    });
+                }
+                a0.edges.push(e);
+                b0.edges.push(e);
+            }
+            return face;
         });
     }
-
-    // this.halfedges = [];
-    // for (let i = 0, faceIndex = 0, il = this.faces.length; i < il; i += 3, ++faceIndex) {
-    //     // const face = new Face(faceIndex, facesArray.slice(i, i + 3));
-    //     const [a, b, c] = this.faces.slice(i, i + 3);
-    //     const start = this.halfedges.length;
-    //     this.halfedges.push(a, b, -1, b, c, -1, c, a, -1);
-    //     for (let h0 = start; h0 < this.halfedges.length; ++h0) {
-    //         const h0v = this.halfedges[h0];
-    //         for (let h1 = start - 1; h1 >= 0; --h1) {
-    //             const h1v = this.halfedges[h1];
-    //             if (h0v[0] === h1v[1] && h0v[1] === h1v[0]) {
-    //                 h0v.push(h1);
-    //                 h1v.push(h0);
-    //                 break;
-    //             }
-    //         }
-    //     }
-    // }
 }
 
