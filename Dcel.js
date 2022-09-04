@@ -26,56 +26,50 @@ export class Dcel {
         this.computeTwins();
     }
 
+    forEdges(face, callback) {
+        const start = face.edge;
+        let e = start;
+        while (true) {
+            callback(e, face, this);
+            e = e.next;
+            if (e === start) {
+                break;
+            }
+        }
+    }
+
     computeTwins() {
         this.faces.forEach(face => {
-            let e = face.edge;
-            for (let j = 0; j < 3; ++j, e = e.next) {
-                const a0 = e.head();
-                const b0 = e.tail();
-                if (!e.twin) {
-                    for (const other of a0.edges) {
-                        const a1 = other.head();
-                        const b1 = other.tail();
-                        if (a0 == b1 && b0 == a1) {
+            this.forEdges(face, e => {
+                if(!e.twin) {
+                    for (const other of e.head().edges) {
+                        if (e.head() === other.tail() && e.tail() === other.head()) {
                             e.setTwin(other);
                             break;
                         }
                     }
                 }
-                a0.edges.push(e);
-                b0.edges.push(e);
-            }
-            return face;
+                e.head().edges.push(e);
+                e.tail().edges.push(e);
+            });
         });
     }
 
     adjacentFaces(faceIndex) {
         const face = this.faces[faceIndex];
         const adj = [];
-        const start = face.edge;
-        let e = start;
-        while (true) {
+        this.forEdges(face, e => {
             adj.push(e.twin.face);
-            e = e.next;
-            if (e === start) {
-                break;
-            }
-        }
+        });
         return adj;
     }
 
     faceVertices(faceIndex) {
         const face = this.faces[faceIndex];
         const vertices = [];
-        const start = face.edge;
-        let e = start;
-        while (true) {
+        this.forEdges(face, e => {
             vertices.push(e.head().index);
-            e = e.next;
-            if (e === start) {
-                break;
-            }
-        }
+        });
         return vertices;
     }
 }
