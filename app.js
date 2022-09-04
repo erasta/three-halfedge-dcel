@@ -25,7 +25,9 @@ class App {
             geometry.deleteAttribute(x);
         });
         geometry = BufferGeometryUtils.mergeVertices(geometry);
+        const start = Date.now();
         this.dcel = new Dcel(geometry);
+        console.log('build dcel took:', Date.now() - start, 'ms for ', this.dcel.faces.length, 'faces');
         geometry.computeVertexNormals();
         this.mesh = new THREE.Mesh(geometry, new THREE.MeshStandardMaterial({ color: 'green' }));
         scene.add(this.mesh);
