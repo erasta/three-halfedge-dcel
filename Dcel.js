@@ -43,13 +43,14 @@ export class Dcel {
             this.forEdges(face, e => {
                 if(!e.twin) {
                     for (const other of e.head().edges) {
+                        // if (e.tail() === other.head()) { // TODO: check if ok to use shorter if
                         if (e.head() === other.tail() && e.tail() === other.head()) {
                             e.setTwin(other);
                             break;
                         }
                     }
                 }
-                e.head().edges.push(e);
+                e.head().edges.push(e); // TODO: check if ok to remove this push
                 e.tail().edges.push(e);
             });
         });
