@@ -28,7 +28,7 @@ class App {
         this.mesh = new THREE.Mesh(geometry, new THREE.MeshStandardMaterial({ color: 'green' }));
         scene.add(this.mesh);
 
-        var colors = ['red', 'yellow', 'cyan', 'blue', 'black', 'purple'];
+        var colors = Array.from({ length: 20 }).map((_, i, arr) => new THREE.Color().setHSL(i / arr.length, 1, 0.5));
         var adjMeshes = colors.map(c => new THREE.Mesh(new THREE.BufferGeometry(), new THREE.MeshBasicMaterial({ color: c })));
         adjMeshes.forEach(m => scene.add(m));
 
