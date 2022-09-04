@@ -56,22 +56,16 @@ export class Dcel {
         });
     }
 
-    adjacentFaces(faceIndex) {
-        const face = this.faces[faceIndex];
-        const adj = [];
-        this.forEdges(face, e => {
-            adj.push(e.twin.face);
+    forAdjacentFaces(faceIndex, callback) {
+        this.forEdges(this.faces[faceIndex], e => {
+            callback(e.twin.face.index);
         });
-        return adj;
     }
 
-    faceVertices(faceIndex) {
-        const face = this.faces[faceIndex];
-        const vertices = [];
-        this.forEdges(face, e => {
-            vertices.push(e.head().index);
+    forFaceVertices(faceIndex, callback) {
+        this.forEdges(this.faces[faceIndex], e => {
+            callback(e.head().index);
         });
-        return vertices;
     }
 }
 

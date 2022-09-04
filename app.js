@@ -47,13 +47,11 @@ class App {
                     new THREE.Vector3().fromBufferAttribute(geometry.attributes.position, inter.face.b),
                     new THREE.Vector3().fromBufferAttribute(geometry.attributes.position, inter.face.c),
                 );
-                const adj = this.dcel.adjacentFaces(inter.faceIndex);
-                for (const face of adj) {
-                    const vertices = this.dcel.faceVertices(face.index);
-                    for (const v of vertices) {
+                this.dcel.forAdjacentFaces(inter.faceIndex, adjFaceIndex => {
+                    this.dcel.forFaceVertices(adjFaceIndex, v => {
                         pointsAdj.push(new THREE.Vector3().fromBufferAttribute(geometry.attributes.position, v));
-                    }
-                }
+                    });
+                });
             }
             currFace.geometry.setFromPoints(pointsCurr);
             adjFaces.geometry.setFromPoints(pointsAdj);
