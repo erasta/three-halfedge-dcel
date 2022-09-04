@@ -15,6 +15,7 @@ class App {
         renderer.setSize(window.innerWidth, window.innerHeight);
         document.body.appendChild(renderer.domElement);
         const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enabled = false;
         scene.environment = new THREE.PMREMGenerator(renderer).fromScene(new RoomEnvironment()).texture;
         scene.background = new THREE.Color(0x888888);
 
@@ -33,10 +34,12 @@ class App {
         scene.add(adjMesh);
 
         const params = {
-            distance: 20
+            distance: 20,
+            moveModel: false
         };
         const gui = new GUI();
         gui.add(params, 'distance').min(1).max(40).step(1);
+        gui.add(params, 'moveModel').onChange(v => controls.enabled = v);
 
         const raycaster = new THREE.Raycaster();
         const pointer = new THREE.Vector2();
