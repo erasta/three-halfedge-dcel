@@ -7,7 +7,7 @@
     "serve": "^14.0.1"
   },
   "name": "three-halfedge-dcel",
-  "description": "Doubly-Connected-Edge-List (DCEL) implementation for three.js",
+  "description": "Doubly-Connected-Edge-List (DCEL) or Half-Edge data structure implementation for three.js",
   "version": "1.0.0",
   "main": "Dcel.js",
   "scripts": {
@@ -18,7 +18,11 @@
     "url": "git+https://github.com/erasta/three-halfedge-dcel.git"
   },
   "keywords": [
-    "threejs"
+    "javascript",
+    "threejs",
+    "3d",
+    "halfedge",
+    "dcel"
   ],
   "author": "erasta",
   "license": "MIT",
