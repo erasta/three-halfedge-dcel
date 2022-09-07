@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { Face } from './ConvexHull.js'; // TODO after r145 import from three
+import { Face } from './libs/ConvexHull.js'; // TODO after r145 import from three instead
 
 /**
  * Doubly Connected Edge List - DCEL
