@@ -45,6 +45,7 @@ class App {
 
         const colorForLevel = Array.from({ length: params.distance }).map((_, i, arr) => new THREE.Color().setHSL(i / arr.length, 1, 0.5));
         const facesIncluded = this.dcel.faces.map(_ => false);
+        const faceIndices = new THREE.Vector3();
 
         const raycaster = new THREE.Raycaster();
         const pointer = new THREE.Vector2();
@@ -67,23 +68,28 @@ class App {
 
                 const points = [];
                 const colors = [];
+
+                geometry.index.array.slice(faceIndex * 3, faceIndex * 3 + 3).forEach(v => {
+                    points.push(new THREE.Vector3().fromBufferAttribute(geometry.attributes.position, v));
+                    colorForLevel[0].toArray(colors, colors.length);
+                });
+
                 for (let i = 1; i < facesForLevel.length; ++i) {
                     facesForLevel[i - 1].forEach((faceIndex) => {
                         this.dcel.forAdjacentFaces(faceIndex, adjFaceIndex => {
                             if (!facesIncluded[adjFaceIndex]) {
                                 facesForLevel[i].push(adjFaceIndex);
                                 facesIncluded[adjFaceIndex] = true;
+
+                                geometry.index.array.slice(adjFaceIndex * 3, adjFaceIndex * 3 + 3).forEach(v => {
+                                    points.push(new THREE.Vector3().fromBufferAttribute(geometry.attributes.position, v));
+                                    colorForLevel[i].toArray(colors, colors.length);
+                                });
                             }
                         });
                     });
                 }
 
-                facesForLevel.forEach((faces, level) => {
-                    faces.forEach(f => this.dcel.forFaceVertices(f, v => {
-                        points.push(new THREE.Vector3().fromBufferAttribute(geometry.attributes.position, v));
-                        colorForLevel[level].toArray(colors, colors.length);//r, colorForLevel[level].g, colorForLevel[level].b);
-                    }));
-                });
                 adjMesh.geometry.setFromPoints(points);
                 adjMesh.geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
             }
