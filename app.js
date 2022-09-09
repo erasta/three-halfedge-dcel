@@ -43,6 +43,9 @@ class App {
         gui.add(params, 'distance').min(1).max(40).step(1);
         gui.add(params, 'moveModel').onChange(v => controls.enabled = v);
 
+        const colorForLevel = Array.from({ length: params.distance }).map((_, i, arr) => new THREE.Color().setHSL(i / arr.length, 1, 0.5));
+        const facesIncluded = this.dcel.faces.map(_ => false);
+
         const raycaster = new THREE.Raycaster();
         const pointer = new THREE.Vector2();
         window.addEventListener('pointermove', (event) => {
@@ -50,34 +53,36 @@ class App {
             pointer.y = - (event.clientY / window.innerHeight) * 2 + 1;
             raycaster.setFromCamera(pointer, camera);
 
-            const colorForLevel = Array.from({ length: params.distance }).map((_, i, arr) => new THREE.Color().setHSL(i / arr.length, 1, 0.5));
-            const facesForLevel = colorForLevel.map(_ => []);
-            const facesIncluded = this.dcel.faces.map(_ => false);
+            const points = [];
+            const colors = [];
+
             const inter = raycaster.intersectObject(this.mesh);
             if (inter.length) {
-                facesForLevel[0].push(inter[0].faceIndex);
-                facesIncluded[inter[0].faceIndex] = true;
-            }
+                const faceIndex = inter[0].faceIndex;
+                const facesForLevel = colorForLevel.map(_ => []);
+                facesForLevel[0].push(faceIndex);
+                facesIncluded.fill(false);
+                facesIncluded[faceIndex] = true;
 
-            for (let i = 1; i < facesForLevel.length; ++i) {
-                facesForLevel[i - 1].forEach((faceIndex) => {
-                    this.dcel.forAdjacentFaces(faceIndex, adjFaceIndex => {
-                        if (!facesIncluded[adjFaceIndex]) {
-                            facesForLevel[i].push(adjFaceIndex);
-                            facesIncluded[adjFaceIndex] = true;
-                        }
+                for (let i = 1; i < facesForLevel.length; ++i) {
+                    facesForLevel[i - 1].forEach((faceIndex) => {
+                        this.dcel.forAdjacentFaces(faceIndex, adjFaceIndex => {
+                            if (!facesIncluded[adjFaceIndex]) {
+                                facesForLevel[i].push(adjFaceIndex);
+                                facesIncluded[adjFaceIndex] = true;
+                            }
+                        });
                     });
+                }
+
+                facesForLevel.forEach((faces, level) => {
+                    faces.forEach(f => this.dcel.forFaceVertices(f, v => {
+                        points.push(new THREE.Vector3().fromBufferAttribute(geometry.attributes.position, v));
+                        colorForLevel[level].toArray(colors, colors.length);//r, colorForLevel[level].g, colorForLevel[level].b);
+                    }));
                 });
             }
 
-            const points = [];
-            const colors = [];
-            facesForLevel.forEach((faces, level) => {
-                faces.forEach(f => this.dcel.forFaceVertices(f, v => {
-                    points.push(new THREE.Vector3().fromBufferAttribute(geometry.attributes.position, v));
-                    colors.push(colorForLevel[level].r, colorForLevel[level].g, colorForLevel[level].b);
-                }));
-            });
             adjMesh.geometry.setFromPoints(points);
             adjMesh.geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
         });
