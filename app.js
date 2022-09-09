@@ -53,17 +53,20 @@ class App {
             pointer.y = - (event.clientY / window.innerHeight) * 2 + 1;
             raycaster.setFromCamera(pointer, camera);
 
-            const points = [];
-            const colors = [];
 
             const inter = raycaster.intersectObject(this.mesh);
-            if (inter.length) {
+            if (!inter.length) {
+                adjMesh.visible = false;
+            } else {
+                adjMesh.visible = true;
                 const faceIndex = inter[0].faceIndex;
                 const facesForLevel = colorForLevel.map(_ => []);
                 facesForLevel[0].push(faceIndex);
                 facesIncluded.fill(false);
                 facesIncluded[faceIndex] = true;
 
+                const points = [];
+                const colors = [];
                 for (let i = 1; i < facesForLevel.length; ++i) {
                     facesForLevel[i - 1].forEach((faceIndex) => {
                         this.dcel.forAdjacentFaces(faceIndex, adjFaceIndex => {
@@ -81,10 +84,10 @@ class App {
                         colorForLevel[level].toArray(colors, colors.length);//r, colorForLevel[level].g, colorForLevel[level].b);
                     }));
                 });
+                adjMesh.geometry.setFromPoints(points);
+                adjMesh.geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
             }
 
-            adjMesh.geometry.setFromPoints(points);
-            adjMesh.geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
         });
 
         function animate() {
