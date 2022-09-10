@@ -8,7 +8,7 @@
   },
   "name": "three-halfedge-dcel",
   "description": "Doubly-Connected-Edge-List (DCEL) or Half-Edge data structure implementation for three.js",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "main": "Dcel.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
