@@ -11,7 +11,9 @@ For more information [wikipedia](https://en.wikipedia.org/wiki/Doubly_connected_
 
 ## Demo
 This demo color the face pointed by the user, and color all its adjacent faces and their adjacent faces, upto the k-th steps distance, with color according to its adjacency steps distance from the pointed face.  
-https://erasta.github.io/three-halfedge-dcel
+https://erasta.github.io/three-halfedge-dcel  
+![Preview of the demo](files/halfedge-small.gif)
+
 
 ## Install
 ```sh
