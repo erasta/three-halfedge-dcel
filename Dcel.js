@@ -16,8 +16,8 @@ export class Dcel {
             };
         });
 
-        if (options.mergeVertices) {
-            const threshold = options.mergeVertices;
+        const threshold = !options ? 1e-4 : options.mergeVertices;
+        if (threshold) {
             const hashToVertex = {}
             this.vertices.forEach(v => {
                 v.origIndex = v.index;
