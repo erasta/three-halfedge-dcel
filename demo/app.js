@@ -19,16 +19,10 @@ class App {
         scene.environment = new THREE.PMREMGenerator(renderer).fromScene(new RoomEnvironment()).texture;
         scene.background = new THREE.Color(0x888888);
 
-        // let geometry = new THREE.TetrahedronGeometry(10);
         let geometry = new THREE.TorusKnotGeometry(10, 2, 200, 32, 3, 5);
-        Object.keys(geometry.attributes).filter(x => x !== 'position').forEach(x => {
-            geometry.deleteAttribute(x);
-        });
-        geometry = BufferGeometryUtils.mergeVertices(geometry);
         const start = Date.now();
-        this.dcel = new Dcel(geometry);
+        this.dcel = new Dcel(geometry, { mergeVertices: 1e-4 });
         console.log('build dcel took:', Date.now() - start, 'ms for ', this.dcel.faces.length, 'faces');
-        geometry.computeVertexNormals();
         this.mesh = new THREE.Mesh(geometry, new THREE.MeshStandardMaterial({ color: 'green' }));
         scene.add(this.mesh);
 

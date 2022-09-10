@@ -8,14 +8,28 @@ import { Face } from './libs/ConvexHull.js'; // TODO after r145 import from thre
  */
 
 export class Dcel {
-    constructor(geometry) {
+    constructor(geometry, options) {
         this.vertices = Array.from({ length: geometry.attributes.position.count }, (_, i) => {
             return {
                 point: new THREE.Vector3().fromBufferAttribute(geometry.attributes.position, i),
-                edges: [],
                 index: i
             };
         });
+
+        if (options.mergeVertices) {
+            const threshold = options.mergeVertices;
+            const hashToVertex = {}
+            this.vertices.forEach(v => {
+                v.origIndex = v.index;
+                const hash = `${~~(v.point.x / threshold)},${~~(v.point.y / threshold)},${~~(v.point.z / threshold)}`;
+                if (hash in hashToVertex) {
+                    v.index = hashToVertex[hash];
+                } else {
+                    hashToVertex[hash] = v.index;
+                }
+            });
+        }
+
         const faceIndices = new THREE.Vector3();
         this.faces = Array.from({ length: geometry.index.count / 3 }, (_, i) => {
             faceIndices.fromArray(geometry.index.array, i * 3);
@@ -23,7 +37,22 @@ export class Dcel {
             face.index = i;
             return face;
         });
-        this.computeTwins();
+
+        const hashToEdge = {};
+        this.faces.forEach(face => {
+            this.forEdges(face, e => {
+                if(!e.twin) {
+                    const hashInv = `${e.tail().index},${e.head().index}`;
+                    if (hashInv in hashToEdge) {
+                        e.setTwin(hashToEdge[hashInv]);
+                    } else {
+                        const hash = `${e.head().index},${e.tail().index}`;
+                        hashToEdge[hash] = e;
+                    }
+                }
+            });
+        });
+
     }
 
     forEdges(face, callback) {
@@ -38,33 +67,9 @@ export class Dcel {
         }
     }
 
-    computeTwins() {
-        this.faces.forEach(face => {
-            this.forEdges(face, e => {
-                if(!e.twin) {
-                    for (const other of e.head().edges) {
-                        // if (e.tail() === other.head()) { // TODO: check if ok to use shorter if
-                        if (e.head() === other.tail() && e.tail() === other.head()) {
-                            e.setTwin(other);
-                            break;
-                        }
-                    }
-                }
-                e.head().edges.push(e); // TODO: check if ok to remove this push
-                e.tail().edges.push(e);
-            });
-        });
-    }
-
     forAdjacentFaces(faceIndex, callback) {
         this.forEdges(this.faces[faceIndex], e => {
             callback(e.twin.face.index);
-        });
-    }
-
-    forFaceVertices(faceIndex, callback) {
-        this.forEdges(this.faces[faceIndex], e => {
-            callback(e.head().index);
         });
     }
 }
