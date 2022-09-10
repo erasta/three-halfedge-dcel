@@ -1,9 +1,9 @@
 import * as THREE from 'three';
-import { RoomEnvironment } from './node_modules/three/examples/jsm/environments/RoomEnvironment.js';
-import { OrbitControls } from './node_modules/three/examples/jsm/controls/OrbitControls.js';
-import { Dcel } from './Dcel.js';
-import * as BufferGeometryUtils from './node_modules/three/examples/jsm/utils/BufferGeometryUtils.js';
-import { GUI } from './node_modules/three/examples/jsm/libs/lil-gui.module.min.js';
+import { RoomEnvironment } from 'three/addon/environments/RoomEnvironment.js';
+import { OrbitControls } from 'three/addon/controls/OrbitControls.js';
+import { Dcel } from '../Dcel.js';
+import * as BufferGeometryUtils from 'three/addon/utils/BufferGeometryUtils.js';
+import { GUI } from 'three/addon/libs/lil-gui.module.min.js';
 
 class App {
     go() {
