@@ -21,7 +21,7 @@ class App {
 
         let geometry = new THREE.TorusKnotGeometry(10, 2, 200, 32, 3, 5);
         const start = Date.now();
-        this.dcel = new Dcel(geometry, { mergeVertices: 1e-4 });
+        this.dcel = new Dcel(geometry);
         console.log('build dcel took:', Date.now() - start, 'ms for ', this.dcel.faces.length, 'faces');
         this.mesh = new THREE.Mesh(geometry, new THREE.MeshStandardMaterial({ color: 'green' }));
         scene.add(this.mesh);

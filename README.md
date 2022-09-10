@@ -24,11 +24,11 @@ npm install --save three-halfedge-dcel
 ```js
 import { Dcel } from 'three-halfedge-dcel';
 const mesh = new THREE.Mesh(...); // get your mesh from somewhere
-const dcel = new Dcel(mesh.geometry);
+const dcel = new Dcel(mesh.geometry, {
+    mergeVerticesThreshold: identical_vertices_max_dist // default: 1e-4
+});
 dcel.forAdjacentFaces(faceIndex, (adjacentFaceIndex) => {
     ... // do something with adjacent faces
 })
 ```
 
-## Note
-Geometry without an [index](https://threejs.org/docs/index.html#api/en/core/BufferGeometry.index) do not reuse vertices between faces, so its faces cannot be classified as adjacent. This can be solved by reconnecting them with [BufferGeometryUtils.mergeVertices](https://threejs.org/docs/index.html#examples/en/utils/BufferGeometryUtils.mergeVertices).
