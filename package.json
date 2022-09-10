@@ -18,11 +18,11 @@
     "url": "git+https://github.com/erasta/three-halfedge-dcel.git"
   },
   "keywords": [
-    "javascript",
     "threejs",
-    "3d",
     "halfedge",
-    "dcel"
+    "dcel",
+    "3d",
+    "javascript"
   ],
   "author": "erasta",
   "license": "MIT",
