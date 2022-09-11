@@ -18,20 +18,19 @@ export class Dcel {
             };
         });
 
-
+        const start = Date.now();
         const threshold = !options ? 1e-4 : options.mergeVerticesThreshold;
         if (threshold) {
             const sphere = new THREE.Sphere(undefined, threshold);
-            const octree = new Octree(this.vertices.map(v => {
-                v.point.index = v.index;
-                return v.point;
-            }));
+            const octree = new Octree(geometry);
+            console.log(Date.now() - start);
+
             this.vertices.forEach(v => {
                 // v.origIndex = v.index;
-                sphere.center  = v.point;
+                sphere.center = v.point;
                 const found = octree.search(sphere);
                 if (found.length >= 2) {
-                    v.index = Math.min(...found.map(p => p.index));
+                    v.index = Math.min(...found);
                 }
             });
             // const hashToVertex = {}
@@ -45,6 +44,8 @@ export class Dcel {
             //     }
             // });
         }
+
+        console.log(Date.now() - start);
 
         const faceIndices = new THREE.Vector3();
         this.faces = Array.from({ length: geometry.index.count / 3 }, (_, i) => {
