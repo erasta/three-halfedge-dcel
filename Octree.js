@@ -42,21 +42,6 @@ export class Octree {
         }
         return ret;
     }
-
-    static boxSplit(box) {
-        const boxes = [];
-        const halfsize = box.getSize(new THREE.Vector3()).multiplyScalar(0.5);
-        for (let x = 0; x < 2; x++) {
-            for (let y = 0; y < 2; y++) {
-                for (let z = 0; z < 2; z++) {
-                    const curr = new THREE.Box3();
-                    curr.min.set(x, y, z).multiply(halfsize).add(box.min);
-                    curr.max.copy(curr.min).add(halfsize);
-                }
-            }
-        }
-        return boxes;
-    }
 }
 
 class SubTree {
@@ -71,10 +56,25 @@ class SubTree {
     }
 
     split() {
-        const boxes = Octree.boxSplit(this.box);
+        const boxes = SubTree.boxSplit(this.box);
         for (const b of boxes) {
             this.subtrees.push(new SubTree(curr, this.vertices, this.indices));
         }
         this.indices = [];
+    }
+
+    static boxSplit(box) {
+        const boxes = [];
+        const halfsize = box.getSize(new THREE.Vector3()).multiplyScalar(0.5);
+        for (let x = 0; x < 2; x++) {
+            for (let y = 0; y < 2; y++) {
+                for (let z = 0; z < 2; z++) {
+                    const curr = new THREE.Box3();
+                    curr.min.set(x, y, z).multiply(halfsize).add(box.min);
+                    curr.max.copy(curr.min).add(halfsize);
+                }
+            }
+        }
+        return boxes;
     }
 }
