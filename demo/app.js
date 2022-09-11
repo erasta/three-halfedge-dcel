@@ -19,7 +19,8 @@ class App {
         scene.environment = new THREE.PMREMGenerator(renderer).fromScene(new RoomEnvironment()).texture;
         scene.background = new THREE.Color(0x888888);
 
-        let geometry = new THREE.TorusKnotGeometry(10, 2, 200, 32, 3, 5);
+        // let geometry = new THREE.BoxGeometry(10, 10, 10);
+        let geometry = new THREE.TorusKnotGeometry(10, 2, 1000, 1000, 3, 5);
         const start = Date.now();
         this.dcel = new Dcel(geometry);
         console.log('build dcel took:', Date.now() - start, 'ms for ', this.dcel.faces.length, 'faces');

@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { Face } from './libs/ConvexHull.js'; // TODO after r145 import from three instead
+import { Octree } from './Octree.js';
 
 /**
  * Doubly Connected Edge List - DCEL
@@ -17,18 +18,32 @@ export class Dcel {
             };
         });
 
+
         const threshold = !options ? 1e-4 : options.mergeVerticesThreshold;
         if (threshold) {
-            const hashToVertex = {}
+            const sphere = new THREE.Sphere(undefined, threshold);
+            const octree = new Octree(this.vertices.map(v => {
+                v.point.index = v.index;
+                return v.point;
+            }));
             this.vertices.forEach(v => {
-                v.origIndex = v.index;
-                const hash = `${~~(v.point.x / threshold)},${~~(v.point.y / threshold)},${~~(v.point.z / threshold)}`;
-                if (hash in hashToVertex) {
-                    v.index = hashToVertex[hash];
-                } else {
-                    hashToVertex[hash] = v.index;
+                // v.origIndex = v.index;
+                sphere.center  = v.point;
+                const found = octree.search(sphere);
+                if (found.length >= 2) {
+                    v.index = Math.min(...found.map(p => p.index));
                 }
             });
+            // const hashToVertex = {}
+            // this.vertices.forEach(v => {
+            //     v.origIndex = v.index;
+            //     const hash = `${~~(v.point.x / threshold)},${~~(v.point.y / threshold)},${~~(v.point.z / threshold)}`;
+            //     if (hash in hashToVertex) {
+            //         v.index = hashToVertex[hash];
+            //     } else {
+            //         hashToVertex[hash] = v.index;
+            //     }
+            // });
         }
 
         const faceIndices = new THREE.Vector3();
