@@ -9,7 +9,8 @@ import { Face } from './libs/ConvexHull.js'; // TODO after r145 import from thre
 
 export class Dcel {
     constructor(geometry, options) {
-        this.vertices = Array.from({ length: geometry.attributes.position.count }, (_, i) => {
+        const num = geometry.attributes.position.count;
+        this.vertices = Array.from({ length: num }, (_, i) => {
             return {
                 point: new THREE.Vector3().fromBufferAttribute(geometry.attributes.position, i),
                 index: i
@@ -38,16 +39,17 @@ export class Dcel {
             return face;
         });
 
-        const hashToEdge = {};
+        const hashToEdge = new Map();
         this.faces.forEach(face => {
             this.forEdges(face, e => {
-                if(!e.twin) {
-                    const hashInv = `${e.tail().index},${e.head().index}`;
-                    if (hashInv in hashToEdge) {
-                        e.setTwin(hashToEdge[hashInv]);
+                if (!e.twin) {
+                    const hashInv = e.tail().index * num + e.head().index;
+                    const other = hashToEdge.get(hashInv);
+                    if (other) {
+                        e.setTwin(other);
                     } else {
-                        const hash = `${e.head().index},${e.tail().index}`;
-                        hashToEdge[hash] = e;
+                        const hash = e.head().index * num + e.tail().index;
+                        hashToEdge.set(hash, e);
                     }
                 }
             });
