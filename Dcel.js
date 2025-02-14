@@ -1,5 +1,5 @@
-import * as THREE from 'three';
-import { Face } from './libs/ConvexHull.js'; // TODO after r145 import from three instead
+import { Vector3 } from 'three';
+import { Face } from 'three/addon/math/ConvexHull.js';
 
 /**
  * Doubly Connected Edge List - DCEL
@@ -12,7 +12,7 @@ export class Dcel {
         const num = geometry.attributes.position.count;
         this.vertices = Array.from({ length: num }, (_, i) => {
             return {
-                point: new THREE.Vector3().fromBufferAttribute(geometry.attributes.position, i),
+                point: new Vector3().fromBufferAttribute(geometry.attributes.position, i),
                 index: i
             };
         });
@@ -31,7 +31,7 @@ export class Dcel {
             });
         }
 
-        const faceIndices = new THREE.Vector3();
+        const faceIndices = new Vector3();
         this.faces = Array.from({ length: geometry.index.count / 3 }, (_, i) => {
             faceIndices.fromArray(geometry.index.array, i * 3);
             const face = Face.create(this.vertices[faceIndices.x], this.vertices[faceIndices.y], this.vertices[faceIndices.z]);
