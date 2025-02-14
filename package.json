@@ -1,14 +1,7 @@
 {
-  "dependencies": {
-    "three": "^0.173.0"
-  },
-  "devDependencies": {
-    "@types/three": "^0.173.0",
-    "serve": "^14.0.1"
-  },
   "name": "three-halfedge-dcel",
   "description": "Doubly-Connected-Edge-List (DCEL) or Half-Edge data structure implementation for three.js",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "main": "Dcel.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -29,5 +22,12 @@
   "bugs": {
     "url": "https://github.com/erasta/three-halfedge-dcel/issues"
   },
-  "homepage": "https://github.com/erasta/three-halfedge-dcel#readme"
+  "homepage": "https://github.com/erasta/three-halfedge-dcel#readme",
+  "dependencies": {
+    "three": "^0.173.0"
+  },
+  "devDependencies": {
+    "@types/three": "^0.173.0",
+    "serve": "^14.0.1"
+  }
 }
