@@ -1,6 +1,5 @@
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { Dcel } from '../dist/Dcel.js';
 import {
     Color,
     Float32BufferAttribute,
@@ -14,6 +13,7 @@ import {
     Vector2,
     WebGLRenderer,
 } from 'three';
+import { Dcel } from '../dist/Dcel/Dcel.js';
 
 class App {
     go() {
