@@ -2,9 +2,10 @@
   "name": "three-halfedge-dcel",
   "description": "Doubly-Connected-Edge-List (DCEL) or Half-Edge data structure implementation for three.js",
   "version": "1.0.3",
-  "main": "Dcel.js",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "tsc --build"
   },
   "repository": {
     "type": "git",
@@ -28,6 +29,7 @@
   },
   "devDependencies": {
     "@types/three": "^0.173.0",
-    "serve": "^14.0.1"
+    "serve": "^14.0.1",
+    "typescript": "^5.7.3"
   }
 }
