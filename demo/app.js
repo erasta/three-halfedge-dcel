@@ -32,18 +32,21 @@ class App {
         scene.background = new Color(0x888888);
 
         const geometry = new TorusKnotGeometry(10, 2, 200, 32, 3, 5);
-        this.mesh = new Mesh(geometry, new MeshStandardMaterial({ color: 'green' }));
+        this.mesh = new Mesh(geometry, new MeshStandardMaterial({ vertexColors: true }));
+        this.color = new Color('green');
+        this.mesh.geometry.setAttribute('color', new Float32BufferAttribute(this.mesh.geometry.attributes.position.array, 3));
+        for (let index = 0; index < this.mesh.geometry.attributes.position.count; index++) {
+            this.color.toArray(this.mesh.geometry.attributes.color.array, index * 3)
+        }
         scene.add(this.mesh);
 
         const start = Date.now();
         this.dcel = new Dcel(geometry);
         console.log('build dcel took:', Date.now() - start, 'ms for ', this.dcel.faces.length, 'faces');
 
-        this.adjMesh = new Mesh(new BufferGeometry(), new MeshBasicMaterial({ vertexColors: true }));
-        scene.add(this.adjMesh);
-
         this.colorForLevel = Array.from({ length: 20 }).map((_, i, arr) => new Color().setHSL(i / arr.length, 1, 0.5));
         this.facesIncluded = this.dcel.faces.map(_ => false);
+        this.facesForLevel = this.colorForLevel.map(_ => []);
 
         const raycaster = new Raycaster();
         const pointer = new Vector2();
@@ -66,25 +69,26 @@ class App {
     }
 
     calcColorsByIntersection(inter) {
-        if (!inter.length) {
-            this.adjMesh.visible = false;
-        } else {
-            this.adjMesh.visible = true;
+        for (let i = 0; i < this.facesForLevel.length; ++i) {
+            for (const faceIndex of this.facesForLevel[i]) {
+                this.mesh.geometry.index.array.slice(faceIndex * 3, faceIndex * 3 + 3).forEach(v => {
+                    this.color.toArray(this.mesh.geometry.attributes.color.array, v * 3)
+                });
+            }
+            this.facesForLevel[i] = [];
+        }
 
+        if (inter.length) {
             const faceIndex = inter[0].faceIndex;
-            const facesForLevel = this.colorForLevel.map(_ => []);
-            facesForLevel[0].push(faceIndex);
+            this.facesForLevel[0].push(faceIndex);
             this.facesIncluded.fill(false);
             this.facesIncluded[faceIndex] = true;
 
-            const points = [];
-            const colors = [];
-
-            for (let i = 1; i < facesForLevel.length; ++i) {
-                facesForLevel[i - 1].forEach((faceIndex) => {
+            for (let i = 1; i < this.facesForLevel.length; ++i) {
+                this.facesForLevel[i - 1].forEach((faceIndex) => {
                     this.dcel.forAdjacentFaces(faceIndex, adjFaceIndex => {
                         if (!this.facesIncluded[adjFaceIndex]) {
-                            facesForLevel[i].push(adjFaceIndex);
+                            this.facesForLevel[i].push(adjFaceIndex);
                             this.facesIncluded[adjFaceIndex] = true;
                         }
                     });
@@ -92,18 +96,15 @@ class App {
             }
 
             // Color faces by levels, a.k.a distance from intersection point
-            for (let i = 0; i < facesForLevel.length; ++i) {
-                for (const faceIndex of facesForLevel[i]) {
+            for (let i = 0; i < this.facesForLevel.length; ++i) {
+                for (const faceIndex of this.facesForLevel[i]) {
                     this.mesh.geometry.index.array.slice(faceIndex * 3, faceIndex * 3 + 3).forEach(v => {
-                        points.push(new Vector3().fromBufferAttribute(this.mesh.geometry.attributes.position, v));
-                        this.colorForLevel[i].toArray(colors, colors.length);
-                    });                        
+                        this.colorForLevel[i].toArray(this.mesh.geometry.attributes.color.array, v * 3);
+                    });
                 }
             }
-
-            this.adjMesh.geometry.setFromPoints(points);
-            this.adjMesh.geometry.setAttribute('color', new Float32BufferAttribute(colors, 3));
         }
+        this.mesh.geometry.attributes.color.needsUpdate = true;
     }
 }
 
