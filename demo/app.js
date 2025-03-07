@@ -33,10 +33,10 @@ class App {
 
         const geometry = new TorusKnotGeometry(10, 2, 200, 32, 3, 5);
         this.mesh = new Mesh(geometry, new MeshStandardMaterial({ vertexColors: true }));
-        this.color = new Color('green');
+        this.defaultColor = new Color('green');
         this.mesh.geometry.setAttribute('color', new Float32BufferAttribute(this.mesh.geometry.attributes.position.array, 3));
-        for (let index = 0; index < this.mesh.geometry.attributes.position.count; index++) {
-            this.color.toArray(this.mesh.geometry.attributes.color.array, index * 3)
+        for (let f = 0, fl = this.mesh.geometry.index.count / 3; f < fl; f++) {
+            this.setFaceColor(f, this.defaultColor);
         }
         scene.add(this.mesh);
 
@@ -69,19 +69,18 @@ class App {
     }
 
     calcColorsByIntersection(inter) {
+        // reset previous colors to default
         for (let i = 0; i < this.facesForLevel.length; ++i) {
             for (const faceIndex of this.facesForLevel[i]) {
-                this.mesh.geometry.index.array.slice(faceIndex * 3, faceIndex * 3 + 3).forEach(v => {
-                    this.color.toArray(this.mesh.geometry.attributes.color.array, v * 3)
-                });
+                this.setFaceColor(faceIndex, this.defaultColor);
             }
             this.facesForLevel[i] = [];
         }
 
         if (inter.length) {
             const faceIndex = inter[0].faceIndex;
-            this.facesForLevel[0].push(faceIndex);
             this.facesIncluded.fill(false);
+            this.facesForLevel[0].push(faceIndex);
             this.facesIncluded[faceIndex] = true;
 
             for (let i = 1; i < this.facesForLevel.length; ++i) {
@@ -98,13 +97,19 @@ class App {
             // Color faces by levels, a.k.a distance from intersection point
             for (let i = 0; i < this.facesForLevel.length; ++i) {
                 for (const faceIndex of this.facesForLevel[i]) {
-                    this.mesh.geometry.index.array.slice(faceIndex * 3, faceIndex * 3 + 3).forEach(v => {
-                        this.colorForLevel[i].toArray(this.mesh.geometry.attributes.color.array, v * 3);
-                    });
+                    this.setFaceColor(faceIndex, this.colorForLevel[i]);
                 }
             }
         }
+
         this.mesh.geometry.attributes.color.needsUpdate = true;
+    }
+
+    setFaceColor(faceIndex, color) {
+        for (let f = faceIndex * 3, fl = f + 3; f < fl; f++) {
+            const vertexIndex = this.mesh.geometry.index.array[f];
+            color.toArray(this.mesh.geometry.attributes.color.array, vertexIndex * 3);
+        }
     }
 }
 
