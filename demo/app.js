@@ -40,11 +40,11 @@ class App {
         this.dcel = new Dcel(geometry);
         console.log('build dcel took:', Date.now() - start, 'ms for ', this.dcel.faces.length, 'faces');
 
-        var adjMesh = new Mesh(new BufferGeometry(), new MeshBasicMaterial({ vertexColors: true }));
-        scene.add(adjMesh);
+        this.adjMesh = new Mesh(new BufferGeometry(), new MeshBasicMaterial({ vertexColors: true }));
+        scene.add(this.adjMesh);
 
         this.colorForLevel = Array.from({ length: 20 }).map((_, i, arr) => new Color().setHSL(i / arr.length, 1, 0.5));
-        const facesIncluded = this.dcel.faces.map(_ => false);
+        this.facesIncluded = this.dcel.faces.map(_ => false);
 
         const raycaster = new Raycaster();
         const pointer = new Vector2();
@@ -52,46 +52,8 @@ class App {
             pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
             pointer.y = - (event.clientY / window.innerHeight) * 2 + 1;
             raycaster.setFromCamera(pointer, camera);
-
             const inter = raycaster.intersectObject(this.mesh);
-            if (!inter.length) {
-                adjMesh.visible = false;
-            } else {
-                adjMesh.visible = true;
-
-                const faceIndex = inter[0].faceIndex;
-                const facesForLevel = this.colorForLevel.map(_ => []);
-                facesForLevel[0].push(faceIndex);
-                facesIncluded.fill(false);
-                facesIncluded[faceIndex] = true;
-
-                const points = [];
-                const colors = [];
-
-                geometry.index.array.slice(faceIndex * 3, faceIndex * 3 + 3).forEach(v => {
-                    points.push(new Vector3().fromBufferAttribute(geometry.attributes.position, v));
-                    this.colorForLevel[0].toArray(colors, colors.length);
-                });
-
-                for (let i = 1; i < facesForLevel.length; ++i) {
-                    facesForLevel[i - 1].forEach((faceIndex) => {
-                        this.dcel.forAdjacentFaces(faceIndex, adjFaceIndex => {
-                            if (!facesIncluded[adjFaceIndex]) {
-                                facesForLevel[i].push(adjFaceIndex);
-                                facesIncluded[adjFaceIndex] = true;
-
-                                geometry.index.array.slice(adjFaceIndex * 3, adjFaceIndex * 3 + 3).forEach(v => {
-                                    points.push(new Vector3().fromBufferAttribute(geometry.attributes.position, v));
-                                    this.colorForLevel[i].toArray(colors, colors.length);
-                                });
-                            }
-                        });
-                    });
-                }
-
-                adjMesh.geometry.setFromPoints(points);
-                adjMesh.geometry.setAttribute('color', new Float32BufferAttribute(colors, 3));
-            }
+            this.calcColorsByIntersection(inter);
         });
 
         function animate() {
@@ -102,6 +64,47 @@ class App {
         animate();
 
         return this;
+    }
+
+    calcColorsByIntersection(inter) {
+        if (!inter.length) {
+            this.adjMesh.visible = false;
+        } else {
+            this.adjMesh.visible = true;
+
+            const faceIndex = inter[0].faceIndex;
+            const facesForLevel = this.colorForLevel.map(_ => []);
+            facesForLevel[0].push(faceIndex);
+            this.facesIncluded.fill(false);
+            this.facesIncluded[faceIndex] = true;
+
+            const points = [];
+            const colors = [];
+
+            this.mesh.geometry.index.array.slice(faceIndex * 3, faceIndex * 3 + 3).forEach(v => {
+                points.push(new Vector3().fromBufferAttribute(this.mesh.geometry.attributes.position, v));
+                this.colorForLevel[0].toArray(colors, colors.length);
+            });
+
+            for (let i = 1; i < facesForLevel.length; ++i) {
+                facesForLevel[i - 1].forEach((faceIndex) => {
+                    this.dcel.forAdjacentFaces(faceIndex, adjFaceIndex => {
+                        if (!this.facesIncluded[adjFaceIndex]) {
+                            facesForLevel[i].push(adjFaceIndex);
+                            this.facesIncluded[adjFaceIndex] = true;
+
+                            this.mesh.geometry.index.array.slice(adjFaceIndex * 3, adjFaceIndex * 3 + 3).forEach(v => {
+                                points.push(new Vector3().fromBufferAttribute(this.mesh.geometry.attributes.position, v));
+                                this.colorForLevel[i].toArray(colors, colors.length);
+                            });
+                        }
+                    });
+                });
+            }
+
+            this.adjMesh.geometry.setFromPoints(points);
+            this.adjMesh.geometry.setAttribute('color', new Float32BufferAttribute(colors, 3));
+        }
     }
 }
 
