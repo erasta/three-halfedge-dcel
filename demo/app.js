@@ -1,7 +1,6 @@
 import { RoomEnvironment } from 'three/addon/environments/RoomEnvironment.js';
 import { OrbitControls } from 'three/addon/controls/OrbitControls.js';
 import { Dcel } from '../Dcel.js';
-import { GUI } from 'three/addon/libs/lil-gui.module.min.js';
 import {
     BufferGeometry,
     Color,
@@ -81,25 +80,25 @@ class App {
             const points = [];
             const colors = [];
 
-            this.mesh.geometry.index.array.slice(faceIndex * 3, faceIndex * 3 + 3).forEach(v => {
-                points.push(new Vector3().fromBufferAttribute(this.mesh.geometry.attributes.position, v));
-                this.colorForLevel[0].toArray(colors, colors.length);
-            });
-
             for (let i = 1; i < facesForLevel.length; ++i) {
                 facesForLevel[i - 1].forEach((faceIndex) => {
                     this.dcel.forAdjacentFaces(faceIndex, adjFaceIndex => {
                         if (!this.facesIncluded[adjFaceIndex]) {
                             facesForLevel[i].push(adjFaceIndex);
                             this.facesIncluded[adjFaceIndex] = true;
-
-                            this.mesh.geometry.index.array.slice(adjFaceIndex * 3, adjFaceIndex * 3 + 3).forEach(v => {
-                                points.push(new Vector3().fromBufferAttribute(this.mesh.geometry.attributes.position, v));
-                                this.colorForLevel[i].toArray(colors, colors.length);
-                            });
                         }
                     });
                 });
+            }
+
+            // Color faces by levels, a.k.a distance from intersection point
+            for (let i = 0; i < facesForLevel.length; ++i) {
+                for (const faceIndex of facesForLevel[i]) {
+                    this.mesh.geometry.index.array.slice(faceIndex * 3, faceIndex * 3 + 3).forEach(v => {
+                        points.push(new Vector3().fromBufferAttribute(this.mesh.geometry.attributes.position, v));
+                        this.colorForLevel[i].toArray(colors, colors.length);
+                    });                        
+                }
             }
 
             this.adjMesh.geometry.setFromPoints(points);
