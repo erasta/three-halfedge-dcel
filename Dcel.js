@@ -1,5 +1,5 @@
 import { Vector3 } from 'three';
-import { Face } from 'three/addon/math/ConvexHull.js';
+import { Face, VertexNode } from 'three/addon/math/ConvexHull.js';
 
 /**
  * Doubly Connected Edge List - DCEL
@@ -11,10 +11,10 @@ export class Dcel {
     constructor(geometry, options) {
         const num = geometry.attributes.position.count;
         this.vertices = Array.from({ length: num }, (_, i) => {
-            return {
-                point: new Vector3().fromBufferAttribute(geometry.attributes.position, i),
-                index: i
-            };
+            const point = new Vector3().fromBufferAttribute(geometry.attributes.position, i);
+            const node = new VertexNode(point);
+            node.index = i
+            return node;
         });
 
         const threshold = !options ? 1e-4 : options.mergeVerticesThreshold;
