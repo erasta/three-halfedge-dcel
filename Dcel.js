@@ -21,7 +21,6 @@ export class Dcel {
         if (threshold) {
             const hashToVertex = {}
             this.vertices.forEach(v => {
-                v.origIndex = v.index;
                 const hash = `${~~(v.point.x / threshold)},${~~(v.point.y / threshold)},${~~(v.point.z / threshold)}`;
                 if (hash in hashToVertex) {
                     v.index = hashToVertex[hash];

@@ -21,6 +21,12 @@ import {
 
 class App {
     go() {
+        const params = {
+            distance: 20,
+        };
+        const gui = new GUI();
+        gui.add(params, 'distance').min(1).max(40).step(1);
+
         const scene = new Scene();
         const camera = new PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         camera.position.set(2.5, 5, 35);
@@ -29,31 +35,22 @@ class App {
         renderer.setSize(window.innerWidth, window.innerHeight);
         document.body.appendChild(renderer.domElement);
         const controls = new OrbitControls(camera, renderer.domElement);
-        controls.enabled = false;
         scene.environment = new PMREMGenerator(renderer).fromScene(new RoomEnvironment()).texture;
         scene.background = new Color(0x888888);
 
-        let geometry = new TorusKnotGeometry(10, 2, 200, 32, 3, 5);
+        const geometry = new TorusKnotGeometry(10, 2, 200, 32, 3, 5);
+        this.mesh = new Mesh(geometry, new MeshStandardMaterial({ color: 'green' }));
+        scene.add(this.mesh);
+
         const start = Date.now();
         this.dcel = new Dcel(geometry);
         console.log('build dcel took:', Date.now() - start, 'ms for ', this.dcel.faces.length, 'faces');
-        this.mesh = new Mesh(geometry, new MeshStandardMaterial({ color: 'green' }));
-        scene.add(this.mesh);
 
         var adjMesh = new Mesh(new BufferGeometry(), new MeshBasicMaterial({ vertexColors: true }));
         scene.add(adjMesh);
 
-        const params = {
-            distance: 20,
-            moveModel: false
-        };
-        const gui = new GUI();
-        gui.add(params, 'distance').min(1).max(40).step(1);
-        gui.add(params, 'moveModel').onChange(v => controls.enabled = v);
-
         const colorForLevel = Array.from({ length: params.distance }).map((_, i, arr) => new Color().setHSL(i / arr.length, 1, 0.5));
         const facesIncluded = this.dcel.faces.map(_ => false);
-        const faceIndices = new Vector3();
 
         const raycaster = new Raycaster();
         const pointer = new Vector2();
@@ -61,7 +58,6 @@ class App {
             pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
             pointer.y = - (event.clientY / window.innerHeight) * 2 + 1;
             raycaster.setFromCamera(pointer, camera);
-
 
             const inter = raycaster.intersectObject(this.mesh);
             if (!inter.length) {
@@ -101,7 +97,6 @@ class App {
                 adjMesh.geometry.setFromPoints(points);
                 adjMesh.geometry.setAttribute('color', new Float32BufferAttribute(colors, 3));
             }
-
         });
 
         function animate() {
@@ -115,4 +110,4 @@ class App {
     }
 }
 
-window.app = new App().go();
+new App().go();
