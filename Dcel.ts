@@ -1,5 +1,5 @@
 import { BufferGeometry, Vector3 } from 'three';
-import { Face, HalfEdge, VertexNode } from 'three/examples/jsm/math/ConvexHull';
+import { Face, HalfEdge, VertexNode } from 'three/examples/jsm/math/ConvexHull.js';
 
 type DcelVertexNode = VertexNode & { index: number };
 type DcelFaceNode = Face & { index: number };

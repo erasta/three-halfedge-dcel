@@ -1,12 +1,10 @@
-import { RoomEnvironment } from 'three/addon/environments/RoomEnvironment.js';
-import { OrbitControls } from 'three/addon/controls/OrbitControls.js';
-import { Dcel } from '../Dcel.js';
+import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import { Dcel } from '../dist/Dcel.js';
 import {
-    BufferGeometry,
     Color,
     Float32BufferAttribute,
     Mesh,
-    MeshBasicMaterial,
     MeshStandardMaterial,
     PerspectiveCamera,
     PMREMGenerator,
@@ -14,7 +12,6 @@ import {
     Scene,
     TorusKnotGeometry,
     Vector2,
-    Vector3,
     WebGLRenderer,
 } from 'three';
 
