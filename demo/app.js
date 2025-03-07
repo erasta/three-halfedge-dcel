@@ -3,30 +3,24 @@ import { OrbitControls } from 'three/addon/controls/OrbitControls.js';
 import { Dcel } from '../Dcel.js';
 import { GUI } from 'three/addon/libs/lil-gui.module.min.js';
 import {
-  BufferGeometry,
-  Color,
-  Float32BufferAttribute,
-  Mesh,
-  MeshBasicMaterial,
-  MeshStandardMaterial,
-  PerspectiveCamera,
-  PMREMGenerator,
-  Raycaster,
-  Scene,
-  TorusKnotGeometry,
-  Vector2,
-  Vector3,
-  WebGLRenderer,
+    BufferGeometry,
+    Color,
+    Float32BufferAttribute,
+    Mesh,
+    MeshBasicMaterial,
+    MeshStandardMaterial,
+    PerspectiveCamera,
+    PMREMGenerator,
+    Raycaster,
+    Scene,
+    TorusKnotGeometry,
+    Vector2,
+    Vector3,
+    WebGLRenderer,
 } from 'three';
 
 class App {
     go() {
-        const params = {
-            distance: 20,
-        };
-        const gui = new GUI();
-        gui.add(params, 'distance').min(1).max(40).step(1);
-
         const scene = new Scene();
         const camera = new PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         camera.position.set(2.5, 5, 35);
@@ -49,7 +43,7 @@ class App {
         var adjMesh = new Mesh(new BufferGeometry(), new MeshBasicMaterial({ vertexColors: true }));
         scene.add(adjMesh);
 
-        const colorForLevel = Array.from({ length: params.distance }).map((_, i, arr) => new Color().setHSL(i / arr.length, 1, 0.5));
+        this.colorForLevel = Array.from({ length: 20 }).map((_, i, arr) => new Color().setHSL(i / arr.length, 1, 0.5));
         const facesIncluded = this.dcel.faces.map(_ => false);
 
         const raycaster = new Raycaster();
@@ -64,8 +58,9 @@ class App {
                 adjMesh.visible = false;
             } else {
                 adjMesh.visible = true;
+
                 const faceIndex = inter[0].faceIndex;
-                const facesForLevel = colorForLevel.map(_ => []);
+                const facesForLevel = this.colorForLevel.map(_ => []);
                 facesForLevel[0].push(faceIndex);
                 facesIncluded.fill(false);
                 facesIncluded[faceIndex] = true;
@@ -75,7 +70,7 @@ class App {
 
                 geometry.index.array.slice(faceIndex * 3, faceIndex * 3 + 3).forEach(v => {
                     points.push(new Vector3().fromBufferAttribute(geometry.attributes.position, v));
-                    colorForLevel[0].toArray(colors, colors.length);
+                    this.colorForLevel[0].toArray(colors, colors.length);
                 });
 
                 for (let i = 1; i < facesForLevel.length; ++i) {
@@ -87,7 +82,7 @@ class App {
 
                                 geometry.index.array.slice(adjFaceIndex * 3, adjFaceIndex * 3 + 3).forEach(v => {
                                     points.push(new Vector3().fromBufferAttribute(geometry.attributes.position, v));
-                                    colorForLevel[i].toArray(colors, colors.length);
+                                    this.colorForLevel[i].toArray(colors, colors.length);
                                 });
                             }
                         });
