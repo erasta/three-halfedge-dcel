@@ -1,7 +1,7 @@
 {
   "name": "three-halfedge-dcel",
   "description": "Doubly-Connected-Edge-List (DCEL) or Half-Edge data structure implementation for three.js",
-  "version": "1.0.3",
+  "version": "1.1.0",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
@@ -16,7 +16,8 @@
     "halfedge",
     "dcel",
     "3d",
-    "javascript"
+    "javascript",
+    "typescript"
   ],
   "author": "erasta",
   "license": "MIT",
@@ -31,5 +32,15 @@
     "@types/three": "^0.173.0",
     "serve": "^14.0.1",
     "typescript": "^5.7.3"
-  }
+  },
+  "files": [
+    "dist/**/**",
+    "docs/**/**",
+    "!**/*.spec.*",
+    "!**/*.json",
+    "!**/*.tsbuildinfo",
+    "LICENSE",
+    "README.md"
+  ],
+  "type": "module"
 }

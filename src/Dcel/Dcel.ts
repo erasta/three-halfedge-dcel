@@ -18,9 +18,9 @@ export class Dcel {
         geometry: BufferGeometry,
         options?: { mergeVerticesThreshold: number; },
     ) {
-        const num = geometry.attributes.position.count;
+        const num = geometry.attributes.position?.count || 0;
         this.vertices = Array.from({ length: num }, (_, i) => {
-            const point = new Vector3().fromBufferAttribute(geometry.attributes.position, i);
+            const point = new Vector3().fromBufferAttribute(geometry.attributes.position!, i);
             const node = new VertexNode(point) as DcelVertexNode;
             node.index = i
             return node;
@@ -32,7 +32,7 @@ export class Dcel {
             this.vertices.forEach(v => {
                 const hash = `${~~(v.point.x / threshold)},${~~(v.point.y / threshold)},${~~(v.point.z / threshold)}`;
                 if (hash in hashToVertex) {
-                    v.index = hashToVertex[hash];
+                    v.index = hashToVertex[hash]!;
                 } else {
                     hashToVertex[hash] = v.index;
                 }
@@ -42,7 +42,10 @@ export class Dcel {
         const faceIndices = new Vector3();
         this.faces = Array.from({ length: geometry.index!.count / 3 }, (_, i) => {
             faceIndices.fromArray(geometry.index!.array, i * 3);
-            const face = Face.create(this.vertices[faceIndices.x], this.vertices[faceIndices.y], this.vertices[faceIndices.z]) as DcelFaceNode;
+            const a = this.vertices[faceIndices.x]!;
+            const b = this.vertices[faceIndices.y]!;
+            const c = this.vertices[faceIndices.z]!;
+            const face = Face.create(a, b, c) as DcelFaceNode;
             face.index = i;
             return face;
         });
@@ -78,7 +81,7 @@ export class Dcel {
     }
 
     forAdjacentFaces(faceIndex: number, callback: (adjFaceIndex: number) => void) {
-        this.forEdges(this.faces[faceIndex], e => {
+        this.forEdges(this.faces[faceIndex]!, e => {
             callback((e.twin.face as DcelFaceNode).index);
         });
     }
